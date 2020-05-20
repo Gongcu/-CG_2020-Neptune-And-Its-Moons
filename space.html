@@ -10,8 +10,10 @@ attribute vec4 vNormal;
 
 varying vec4 fColor;
 
-uniform bool type; //Moon or Earth
-uniform vec4 ambientProduct, diffuseProduct,diffuseProductMoon, specularProduct;
+uniform int type; //Moon or Earth
+uniform vec4 ambientProduct, diffuseProduct,specularProduct;
+uniform vec4 diffuseProductMoon, diffuseProductRing;
+
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform vec4 lightPosition;
@@ -79,8 +81,10 @@ main()
 
     float Kd = max( dot(L, N), 0.0 );
     vec4  diffuse;
-    if(type)
+    if(type==1)
         diffuse= Kd*diffuseProduct;
+    else if(type==10)
+        diffuse= Kd*diffuseProductRing;
     else
         diffuse= Kd*diffuseProductMoon;
 

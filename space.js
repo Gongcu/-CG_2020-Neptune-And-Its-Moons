@@ -9,19 +9,24 @@ var pointsArray = [];
 var normalsArray = [];
 
 
-var near = -15;
-var far = 15;
+var near = -20;
+var far = 20;
 var radius = 1.5;
 var theta  = 0.0;
 var moon_theta  = 0.0;
+var ring_theta  = 0.0;
 
 var phi    = 0.0;
 var dr = 1 * Math.PI/180.0; //rotating speed
 var moon_dr = 5 * Math.PI/180.0; //moon's rotating speed
+var ring_dr = 20 * Math.PI/180.0; //ring's rotating speed
 
 
-var left = -10.0, right = 10.0, ytop =10.0, bottom = -10.0;
-var left_m1 = -15.0, right_m1 = 15.0, ytop_m1 =15.0, bottom_m1 = -15.0;
+var left = -70.0, right = 70.0, ytop =70.0, bottom = -70.0;
+var left_m1 = -50.0, right_m1 = 50.0, ytop_m1 =50.0, bottom_m1 = -50.0;
+var left_m2 = -5.0, right_m2 = 5.0, ytop_m2 =5.0, bottom_m2 = -5.0;
+var left_ring = -50.0, right_ring = 50.0, ytop_ring =50.0, bottom_ring = -50.0;
+
 
 var va = vec4(0.0, 0.0, -1.0,1);
 var vb = vec4(0.0, 0.842809, 0.333333, 1);
@@ -37,6 +42,8 @@ var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 0.1, 0.4, 0.8, 1.0 );
 var materialDiffuseMoon = vec4( 1.0, 0.9, 0.5, 1.0 );
+var materialDiffuseRing = vec4( 1.0, 0.0, 0.0, 1.0 );
+
 var materialSpecular = vec4( 1.0, 0.0, 0.0, 1.0 );
 var materialShininess = 5000.0;
 
@@ -120,6 +127,7 @@ window.onload = function init() {
     ambientProduct = mult(lightAmbient, materialAmbient);
     diffuseProduct = mult(lightDiffuse, materialDiffuse);
     diffuseProductMoon = mult(lightDiffuse, materialDiffuseMoon);
+    diffuseProductRing = mult(lightDiffuse, materialDiffuseRing);
     specularProduct = mult(lightSpecular, materialSpecular);
 
     
@@ -160,6 +168,8 @@ window.onload = function init() {
     gl.uniform4fv( gl.getUniformLocation(program, 
         "diffuseProductMoon"),flatten(diffuseProductMoon) );
     gl.uniform4fv( gl.getUniformLocation(program, 
+        "diffuseProductRing"),flatten(diffuseProductRing) );
+    gl.uniform4fv( gl.getUniformLocation(program, 
        "specularProduct"),flatten(specularProduct) );	
     gl.uniform4fv( gl.getUniformLocation(program, 
        "lightPosition"),flatten(lightPosition) );
@@ -171,105 +181,89 @@ window.onload = function init() {
 
 
 function render() {
-    
+
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.uniform1f( typeLoc, 0);
-    eye = vec3(radius*Math.sin(theta)*Math.cos(phi), 
-        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
+    moonDraw(0,translate(-20,0,5),left,right,bottom,ytop,theta);
+    moonDraw(0,translate(-20,0,0),left_m1,right_m1,bottom_m1,ytop_m1,moon_theta);
+    moonDraw(1,translate(-1,0,0),left_m2,right_m2,bottom_m2,ytop_m2,moon_theta);
+    ringDrawDriven();
     
-    var t = translate(-4, 0, -4);
-    modelViewMatrix = lookAt(eye, at , up);
-    modelViewMatrix = mult(modelViewMatrix,t);
-    projectionMatrix = ortho(left, right, bottom, ytop, near, far);
-    
-
-    // normal matrix only really need if there is nonuniform scaling
-    // it's here for generality but since there is
-    // no scaling in this example we could just use modelView matrix in shaders
-    
-    normalMatrix = [
-        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
-        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
-        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
-    ];
-            
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
-    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
-        
-    for( var i=0; i<index; i+=3) {
-        gl.drawArrays( gl.TRIANGLES, i, 3 );
-    }
-    
-    index = 0;
-    pointsArray = []; 
-    normalsArray = [];
-
-    left = -5.0;right = 5.0;ytop =5.0;bottom = -5.0;
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
-
-    gl.uniform1f( typeLoc, 1);
-    eye = vec3(radius*Math.sin(moon_theta)*Math.cos(phi), 
-        radius*Math.sin(moon_theta)*Math.sin(phi), radius*Math.cos(moon_theta));
-
-    var t = translate(-1, 0, 0);
-    modelViewMatrix = lookAt(eye, at , up);
-    modelViewMatrix = mult(modelViewMatrix,t);
-    projectionMatrix = ortho(left, right, bottom, ytop, near, far);
-
-    
-
-    // normal matrix only really need if there is nonuniform scaling
-    // it's here for generality but since there is
-    // no scaling in this example we could just use modelView matrix in shaders
-    
-    normalMatrix = [
-        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
-        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
-        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
-    ];
-            
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
-    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
-        
-    for( var i=0; i<index; i+=3) {
-        gl.drawArrays( gl.TRIANGLES, i, 3 );
-    }
-
-    
-    index = 0;
-    pointsArray = []; 
-    normalsArray = [];
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
-
-    gl.uniform1f( typeLoc, 1);
-    eye = vec3(radius*Math.sin(moon_theta)*Math.cos(phi), 
-        radius*Math.sin(moon_theta)*Math.sin(phi), radius*Math.cos(moon_theta));
-
-    t = translate(-9, 0, 0);
-    modelViewMatrix = lookAt(eye, at , up);
-    modelViewMatrix = mult(modelViewMatrix,t);
-    projectionMatrix = ortho(left_m1, right_m1, bottom_m1, ytop_m1, near, far);
-
-    
-    normalMatrix = [
-        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
-        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
-        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
-    ];
-            
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
-    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
-        
-    for( var i=0; i<index; i+=3) {
-        gl.drawArrays( gl.TRIANGLES, i, 3 );
-    }
-    left = -10.0;right = 10.0;ytop =10.0;bottom = -10.0;
-
     theta += dr;
     moon_theta += moon_dr;
+    ring_theta += ring_dr;
     
     window.requestAnimFrame(render);
+}
+
+function moonDraw(type,p, l,r,b,t,theta){
+    index = 0; pointsArray = [];  normalsArray = [];
+
+    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+
+    gl.uniform1i( typeLoc, type);
+    eye = vec3(radius*Math.sin(theta)*Math.cos(phi), 
+        radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
+
+    modelViewMatrix = lookAt(eye, at , up);
+    modelViewMatrix = mult(modelViewMatrix,p);
+    projectionMatrix = ortho(l, r, b, t, near, far);
+
+    normalMatrix = [
+        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
+        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
+        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
+    ];
+            
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
+    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
+        
+    for( var i=0; i<index; i+=3) {
+        gl.drawArrays( gl.TRIANGLES, i, 3 );
+    }
+}
+function ringDraw(type,p, l,r,b,t){
+    index = 0; pointsArray = [];  normalsArray = [];
+
+    tetrahedron(va, vb, vc, vd, 3);
+
+    gl.uniform1i( typeLoc, type);
+    eye = vec3(radius*Math.sin(ring_theta)*Math.cos(phi), 
+        radius*Math.sin(ring_theta)*Math.sin(phi), radius*Math.cos(ring_theta));
+
+    modelViewMatrix = lookAt(eye, at , up);
+    modelViewMatrix = mult(modelViewMatrix,p);
+    projectionMatrix = ortho(l, r, b, t, -10, far);
+
+    normalMatrix = [
+        vec3(modelViewMatrix[0][0], modelViewMatrix[0][1], modelViewMatrix[0][2]),
+        vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
+        vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
+    ];
+            
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
+    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
+        
+    for( var i=0; i<index; i+=3) {
+        gl.drawArrays( gl.TRIANGLES, i, 3 );
+    }
+}
+function ringDrawDriven() {
+    ringDraw(10, translate(-10, 0,  5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(10, 0,  5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(10, 0, - 5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-10, 0, - 5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-5, 0, 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(5, 0,  10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(5, 0, - 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-5, 0, - 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-6, 0, 9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(6, 0, 9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-6, 0, -9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(6, 0, -9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-9, 0, -6), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(9, 0, -6), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-9, 0, 6), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(9, 0, 6), left_ring, right_ring, bottom_ring, ytop_ring);
 }
