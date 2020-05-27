@@ -56,7 +56,7 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 var normalMatrix, normalMatrixLoc;
 
 var eye;
-var at = vec3(-1, 0.0, 0.0);
+var at = vec3(0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
     
 var typeLoc;
@@ -185,7 +185,7 @@ function render() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     moonDraw(0,translate(-20,0,5),left,right,bottom,ytop,theta);
     moonDraw(0,translate(-20,0,0),left_m1,right_m1,bottom_m1,ytop_m1,moon_theta);
-    moonDraw(1,translate(-1,0,0),left_m2,right_m2,bottom_m2,ytop_m2,moon_theta);
+    moonDraw(1,translate(0,0,0),left_m2,right_m2,bottom_m2,ytop_m2,moon_theta);
     ringDrawDriven();
     
     theta += dr;
@@ -250,20 +250,38 @@ function ringDraw(type,p, l,r,b,t){
     }
 }
 function ringDrawDriven() {
-    ringDraw(10, translate(-10, 0,  5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-10, 0.2,  5), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(10, 0,  5), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(10, 0, - 5), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(10, 0.2, - 5), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-10, 0, - 5), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(-5, 0, 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-5, -0.2, 10), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(5, 0,  10), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(5, 0, - 10), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(-5, 0, - 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-5, 0.1, - 10), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-6, 0, 9), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(6, 0, 9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(6, 0.2, 9), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-6, 0, -9), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(6, 0, -9), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(6, 0.1, -9), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-9, 0, -6), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(9, 0, -6), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(9, 0.2, -6), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-9, 0, 6), left_ring, right_ring, bottom_ring, ytop_ring);
-    ringDraw(10, translate(9, 0, 6), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(9, -0.3, 6), left_ring, right_ring, bottom_ring, ytop_ring);
+
+    ringDraw(10, translate(-7, 0, 8), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(7, -0.2, 8), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-7, 0, -8), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(7, 0.1, -8), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-8, 0, -7), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(8, 0.2, -7), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-8, 0, 7), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(8, 0.2, 7), left_ring, right_ring, bottom_ring, ytop_ring);
+
+    ringDraw(10, translate(-1, 0, 11), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(1, 0.1, 11), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-1, 0, -11), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(1, 0.2, -11), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-11, -0.2, -2), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(11, 0.2, -2), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-11, 0.2, 2), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(11, -0.2, 2), left_ring, right_ring, bottom_ring, ytop_ring);
 }
