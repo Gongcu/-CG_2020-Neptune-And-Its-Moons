@@ -8,17 +8,26 @@ var index = 0;
 var pointsArray = [];
 var normalsArray = [];
 
+var ring_status = false;
+var moon1_status = false;
+var moon2_status = false;
+var moon3_status = false;
 
 var near = -20;
 var far = 20;
 var radius = 1.5;
 var theta  = 0.0;
-var moon_theta  = 0.0;
+var moon1_theta  = 0.0;
+var moon2_theta  = 0.0;
+var moon3_theta  = 0.0;
 var ring_theta  = 0.0;
 
 var phi    = 0.0;
 var dr = 1 * Math.PI/180.0; //rotating speed
-var moon_dr = 5 * Math.PI/180.0; //moon's rotating speed
+var moon1_dr = 5 * Math.PI/180.0; //moon's rotating speed
+var moon2_dr = 10 * Math.PI/180.0; //moon's rotating speed
+var moon3_dr = 2 * Math.PI/180.0; //moon's rotating speed
+
 var ring_dr = 20 * Math.PI/180.0; //ring's rotating speed
 
 
@@ -41,7 +50,9 @@ var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 0.1, 0.4, 0.8, 1.0 );
-var materialDiffuseMoon = vec4( 1.0, 0.9, 0.5, 1.0 );
+var materialDiffuseMoon1 = vec4( 1.0, 0.9, 0.5, 1.0 );
+var materialDiffuseMoon2 = vec4( 0.5, 0.9, 0.5, 1.0 );
+var materialDiffuseMoon3 = vec4( 0.3, 0.2, 0.5, 1.0 );
 var materialDiffuseRing = vec4( 1.0, 0.0, 0.0, 1.0 );
 
 var materialSpecular = vec4( 1.0, 0.0, 0.0, 1.0 );
@@ -126,7 +137,9 @@ window.onload = function init() {
 
     ambientProduct = mult(lightAmbient, materialAmbient);
     diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    diffuseProductMoon = mult(lightDiffuse, materialDiffuseMoon);
+    diffuseProductMoon1 = mult(lightDiffuse, materialDiffuseMoon1);
+    diffuseProductMoon2 = mult(lightDiffuse, materialDiffuseMoon2);
+    diffuseProductMoon3 = mult(lightDiffuse, materialDiffuseMoon3);
     diffuseProductRing = mult(lightDiffuse, materialDiffuseRing);
     specularProduct = mult(lightSpecular, materialSpecular);
 
@@ -154,27 +167,31 @@ window.onload = function init() {
     projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix" );
     normalMatrixLoc = gl.getUniformLocation( program, "normalMatrix" );
 
-    document.getElementById("Button0").onclick = function(){radius *= 2.0;};
-    document.getElementById("Button1").onclick = function(){radius *= 0.5;};
-    document.getElementById("Button4").onclick = function(){phi += dr;};
-    document.getElementById("Button5").onclick = function(){phi -= dr;};
+    document.getElementById("Button0").onclick = function(){ring_status=!ring_status;};
+    document.getElementById("Button1").onclick = function(){moon1_status=!moon1_status;};
+    document.getElementById("Button2").onclick = function(){moon2_status=!moon2_status;};
+    document.getElementById("Button3").onclick = function(){moon3_status=!moon3_status;};
     
 
     
-    gl.uniform4fv( gl.getUniformLocation(program, 
-       "ambientProduct"),flatten(ambientProduct) );
-    gl.uniform4fv( gl.getUniformLocation(program, 
-       "diffuseProduct"),flatten(diffuseProduct) );
-    gl.uniform4fv( gl.getUniformLocation(program, 
-        "diffuseProductMoon"),flatten(diffuseProductMoon) );
-    gl.uniform4fv( gl.getUniformLocation(program, 
-        "diffuseProductRing"),flatten(diffuseProductRing) );
-    gl.uniform4fv( gl.getUniformLocation(program, 
-       "specularProduct"),flatten(specularProduct) );	
-    gl.uniform4fv( gl.getUniformLocation(program, 
-       "lightPosition"),flatten(lightPosition) );
-    gl.uniform1f( gl.getUniformLocation(program, 
-       "shininess"),materialShininess );
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "ambientProduct"), flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProduct"), flatten(diffuseProduct));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProductMoon1"), flatten(diffuseProductMoon1));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProductMoon2"), flatten(diffuseProductMoon2));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProductMoon3"), flatten(diffuseProductMoon3));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProductRing"), flatten(diffuseProductRing));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "specularProduct"), flatten(specularProduct));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "lightPosition"), flatten(lightPosition));
+    gl.uniform1f(gl.getUniformLocation(program,
+        "shininess"), materialShininess);
 
     render();
 }
@@ -183,13 +200,21 @@ window.onload = function init() {
 function render() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    moonDraw(0,translate(-20,0,5),left,right,bottom,ytop,theta);
-    moonDraw(0,translate(-20,0,0),left_m1,right_m1,bottom_m1,ytop_m1,moon_theta);
-    moonDraw(1,translate(0,0,0),left_m2,right_m2,bottom_m2,ytop_m2,moon_theta);
-    ringDrawDriven();
+    moonDraw(1,translate(0,0,0),left_m2,right_m2,bottom_m2,ytop_m2,theta);
+
+    if(moon1_status)
+        moonDraw(0,translate(-20,-1,5),left,right,bottom,ytop,moon1_theta);
+    if(moon2_status)
+        moonDraw(2,translate(-20,0,0),left_m1,right_m1,bottom_m1,ytop_m1,moon2_theta);
+    if(moon3_status)
+        moonDraw(3,translate(-15,1,7),left_m1,right_m1,bottom_m1,ytop_m1,moon3_theta);
+    if(ring_status)
+        ringDrawDriven();
     
     theta += dr;
-    moon_theta += moon_dr;
+    moon1_theta += moon1_dr;
+    moon2_theta += moon2_dr;
+    moon3_theta += moon3_dr;
     ring_theta += ring_dr;
     
     window.requestAnimFrame(render);
@@ -240,6 +265,7 @@ function ringDraw(type,p, l,r,b,t){
         vec3(modelViewMatrix[1][0], modelViewMatrix[1][1], modelViewMatrix[1][2]),
         vec3(modelViewMatrix[2][0], modelViewMatrix[2][1], modelViewMatrix[2][2])
     ];
+
             
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
@@ -284,4 +310,13 @@ function ringDrawDriven() {
     ringDraw(10, translate(11, 0.2, -2), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(-11, 0.2, 2), left_ring, right_ring, bottom_ring, ytop_ring);
     ringDraw(10, translate(11, -0.2, 2), left_ring, right_ring, bottom_ring, ytop_ring);
+
+    ringDraw(10, translate(-4, 0, 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(4, 0.1, 10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-4, 0, -10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(4, -0.2, -10), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-10, -0.2, -2), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(10, 0.2, -4), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(-10, 0.2, 4), left_ring, right_ring, bottom_ring, ytop_ring);
+    ringDraw(10, translate(10, -0.2, 4), left_ring, right_ring, bottom_ring, ytop_ring);
 }
