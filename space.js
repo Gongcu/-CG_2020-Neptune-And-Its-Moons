@@ -12,6 +12,8 @@ var ring_status = false;
 var moon1_status = false;
 var moon2_status = false;
 var moon3_status = false;
+var moon4_status = false;
+
 
 var near = -20;
 var far = 20;
@@ -20,6 +22,7 @@ var theta  = 0.0;
 var moon1_theta  = 0.0;
 var moon2_theta  = 0.0;
 var moon3_theta  = 0.0;
+var moon4_theta  = 0.0;
 var ring_theta  = 0.0;
 
 var phi    = 0.0;
@@ -27,6 +30,7 @@ var dr = 1 * Math.PI/180.0; //rotating speed
 var moon1_dr = 5 * Math.PI/180.0; //moon's rotating speed
 var moon2_dr = 10 * Math.PI/180.0; //moon's rotating speed
 var moon3_dr = 2 * Math.PI/180.0; //moon's rotating speed
+var moon4_dr = 1 * Math.PI/180.0; //moon's rotating speed
 
 var ring_dr = 20 * Math.PI/180.0; //ring's rotating speed
 
@@ -53,6 +57,8 @@ var materialDiffuse = vec4( 0.1, 0.4, 0.8, 1.0 );
 var materialDiffuseMoon1 = vec4( 1.0, 0.9, 0.5, 1.0 );
 var materialDiffuseMoon2 = vec4( 0.5, 0.9, 0.5, 1.0 );
 var materialDiffuseMoon3 = vec4( 0.3, 0.2, 0.5, 1.0 );
+var materialDiffuseMoon4 = vec4( 0.7, 0.2, 0.5, 1.0 );
+
 var materialDiffuseRing = vec4( 1.0, 0.0, 0.0, 1.0 );
 
 var materialSpecular = vec4( 1.0, 0.0, 0.0, 1.0 );
@@ -140,6 +146,7 @@ window.onload = function init() {
     diffuseProductMoon1 = mult(lightDiffuse, materialDiffuseMoon1);
     diffuseProductMoon2 = mult(lightDiffuse, materialDiffuseMoon2);
     diffuseProductMoon3 = mult(lightDiffuse, materialDiffuseMoon3);
+    diffuseProductMoon4 = mult(lightDiffuse, materialDiffuseMoon4);
     diffuseProductRing = mult(lightDiffuse, materialDiffuseRing);
     specularProduct = mult(lightSpecular, materialSpecular);
 
@@ -171,7 +178,8 @@ window.onload = function init() {
     document.getElementById("Button1").onclick = function(){moon1_status=!moon1_status;};
     document.getElementById("Button2").onclick = function(){moon2_status=!moon2_status;};
     document.getElementById("Button3").onclick = function(){moon3_status=!moon3_status;};
-    
+    document.getElementById("Button4").onclick = function(){moon4_status=!moon4_status;};
+
 
     
     gl.uniform4fv(gl.getUniformLocation(program,
@@ -184,6 +192,8 @@ window.onload = function init() {
         "diffuseProductMoon2"), flatten(diffuseProductMoon2));
     gl.uniform4fv(gl.getUniformLocation(program,
         "diffuseProductMoon3"), flatten(diffuseProductMoon3));
+    gl.uniform4fv(gl.getUniformLocation(program,
+        "diffuseProductMoon4"), flatten(diffuseProductMoon4));
     gl.uniform4fv(gl.getUniformLocation(program,
         "diffuseProductRing"), flatten(diffuseProductRing));
     gl.uniform4fv(gl.getUniformLocation(program,
@@ -208,6 +218,8 @@ function render() {
         moonDraw(2,translate(-20,0,0),left_m1,right_m1,bottom_m1,ytop_m1,moon2_theta);
     if(moon3_status)
         moonDraw(3,translate(-15,1,7),left_m1,right_m1,bottom_m1,ytop_m1,moon3_theta);
+    if(moon4_status)
+        moonDraw(10,translate(-7,1,10),left_m1,right_m1,bottom_m1,ytop_m1,moon4_theta);
     if(ring_status)
         ringDrawDriven();
     
@@ -215,6 +227,7 @@ function render() {
     moon1_theta += moon1_dr;
     moon2_theta += moon2_dr;
     moon3_theta += moon3_dr;
+    moon4_theta += moon4_dr;
     ring_theta += ring_dr;
     
     window.requestAnimFrame(render);

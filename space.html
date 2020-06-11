@@ -12,7 +12,7 @@ varying vec4 fColor;
 
 uniform int type; //Moon or Earth
 uniform vec4 ambientProduct, diffuseProduct,specularProduct;
-uniform vec4 diffuseProductMoon1,diffuseProductMoon2,diffuseProductMoon3, diffuseProductRing;
+uniform vec4 diffuseProductMoon1,diffuseProductMoon2,diffuseProductMoon3,diffuseProductMoon4, diffuseProductRing;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -87,6 +87,8 @@ main()
         diffuse = Kd*diffuseProductMoon2;
     else if(type==3)
         diffuse = Kd*diffuseProductMoon3;
+    else if(type==4)
+        diffuse = Kd*diffuseProductMoon4;
     else if(type==10)
         diffuse= Kd*diffuseProductRing;
     else
@@ -128,6 +130,7 @@ main()
 <button id = "Button1">위성1 생성/제거</button>
 <button id = "Button2">위성2 생성/제거</button>
 <button id = "Button3">위성3 생성/제거</button>
+<button id = "Button4">위성4 생성/제거</button>
 
 
 <p></p>
